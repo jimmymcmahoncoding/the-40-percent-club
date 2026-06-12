@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply antialiased;
+    }
+}
+
+@layer utilities {
+
+    /* Ensure calendar day cells are always at least 36px for touch targets */
+    .aspect-square {
+        min-width: 36px;
+        min-height: 36px;
+    }
+}
