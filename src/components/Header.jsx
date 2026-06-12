@@ -18,6 +18,9 @@ export default function Header({ onReset }) {
                     <p className="text-indigo-200 text-sm mt-0.5">
                         Office Attendance Tracker · 2026
                     </p>
+                    <p className="text-indigo-300 text-xs mt-0.5 tracking-wide">
+                        jimmymcmahoncoding™
+                    </p>
                 </div>
 
                 <div className="flex items-center gap-2">
