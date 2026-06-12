@@ -58,8 +58,8 @@ export default function StatsPanel({ stats }) {
 
             {/* ── Status banner ── */}
             <div className={`rounded-2xl px-4 py-4 flex items-center justify-between gap-3 ${isOnTarget
-                    ? 'bg-green-500/10 dark:bg-green-500/15 border border-green-500/20'
-                    : 'bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20'
+                ? 'bg-green-500/10 dark:bg-green-500/15 border border-green-500/20'
+                : 'bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20'
                 }`}>
                 <div>
                     <p className={`text-xs font-semibold uppercase tracking-wider mb-0.5 ${isOnTarget ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>

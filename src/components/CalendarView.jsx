@@ -183,8 +183,8 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                         <div
                             key={h}
                             className={`text-center text-[11px] font-semibold py-1 ${h === 'Sat' || h === 'Sun'
-                                    ? 'text-gray-300 dark:text-gray-700'
-                                    : 'text-gray-400 dark:text-gray-500'
+                                ? 'text-gray-300 dark:text-gray-700'
+                                : 'text-gray-400 dark:text-gray-500'
                                 }`}
                         >
                             {h}

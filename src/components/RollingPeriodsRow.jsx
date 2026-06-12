@@ -56,7 +56,7 @@ function PeriodCard({ label, data, testId }) {
 
 export default function RollingPeriodsRow({ stats }) {
     return (
-        <div className="grid grid-cols-2 gap-3" data-testid="rolling-periods">
+        <div className="grid grid-cols-1 gap-3" data-testid="rolling-periods">
             <PeriodCard label="Last 4 Weeks" data={stats.rolling4} testId="rolling-4-week-card" />
             <PeriodCard label="Last 12 Weeks" data={stats.rolling12} testId="rolling-12-week-card" />
         </div>

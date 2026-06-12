@@ -47,8 +47,8 @@ export default function ProjectionCard({ stats }) {
 
             {/* Guidance */}
             <div className={`rounded-2xl px-4 py-3.5 text-sm ${onTrackForYear
-                    ? 'bg-green-500/10 dark:bg-green-500/15 text-green-700 dark:text-green-300'
-                    : 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'
+                ? 'bg-green-500/10 dark:bg-green-500/15 text-green-700 dark:text-green-300'
+                : 'bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300'
                 }`}>
                 {onTrackForYear ? (
                     <p>🎉 You've already hit your 40% target for the year — keep it up!</p>
