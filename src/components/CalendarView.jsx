@@ -19,7 +19,6 @@ const YEAR_START = '2026-01-01'
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function getDayCellClasses(dateStr, entryType) {
-    const todayStr = today()
     const todayHighlight = isToday(dateStr)
     const future = isFuture(dateStr)
     const weekend = isWeekend(dateStr)
@@ -27,28 +26,30 @@ function getDayCellClasses(dateStr, entryType) {
     const baseline = dateStr >= YEAR_START && dateStr <= BASELINE_END
 
     if (weekend) {
-        return 'bg-slate-50 text-slate-300 cursor-default select-none'
+        return 'bg-transparent text-gray-300 dark:text-gray-700 cursor-default select-none'
     }
     if (bh) {
-        return 'bg-slate-100 text-slate-400 cursor-default select-none'
+        return 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-default select-none'
     }
     if (baseline) {
-        return 'bg-gray-100 text-gray-400 cursor-default select-none border border-gray-200'
+        return 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-default select-none'
     }
 
-    // Interactive day
-    const ring = todayHighlight ? 'ring-2 ring-indigo-500 ring-offset-1' : ''
-    const dimFuture = future ? 'opacity-60' : ''
+    const ring = todayHighlight ? 'ring-2 ring-indigo-500 dark:ring-indigo-400 ring-offset-1 dark:ring-offset-gray-900' : ''
+    const dimFuture = future ? 'opacity-50' : ''
 
     switch (entryType) {
         case 'office':
-            return `bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 ${ring} ${dimFuture}`
+            return `bg-green-500 dark:bg-green-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
         case 'wfh':
-            return `bg-blue-500 text-white font-semibold cursor-pointer hover:bg-blue-600 ${ring} ${dimFuture}`
+            return `bg-indigo-500 dark:bg-indigo-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
         case 'absent':
-            return `bg-amber-400 text-white font-semibold cursor-pointer hover:bg-amber-500 ${ring} ${dimFuture}`
+            return `bg-amber-400 dark:bg-amber-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
         default:
-            return `${todayHighlight ? 'bg-indigo-50' : 'bg-white hover:bg-gray-50'} text-gray-700 cursor-pointer border border-gray-200 ${ring} ${dimFuture}`
+            return `${todayHighlight
+                ? 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold'
+                : 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300'
+                } cursor-pointer active:scale-95 border border-gray-200 dark:border-white/10 ${ring} ${dimFuture}`
     }
 }
 
@@ -72,23 +73,10 @@ function DayCell({ dateStr, entryType, onClick }) {
                         ? 'Baseline period — not individually tracked'
                         : undefined
             }
-            className={`
-        relative aspect-square flex flex-col items-center justify-center
-        rounded-lg text-sm transition-all duration-150 select-none
-        ${classes}
-      `}
+            className={`relative aspect-square flex flex-col items-center justify-center rounded-xl text-sm transition-all duration-150 select-none ${classes}`}
         >
             <span className="leading-none">{day}</span>
-            {bh && (
-                <span className="text-[9px] leading-none mt-0.5 text-slate-400 hidden sm:block">
-                    BH
-                </span>
-            )}
-            {baseline && (
-                <span className="text-[8px] leading-none mt-0.5 text-gray-400 hidden sm:block">
-                    —
-                </span>
-            )}
+            {bh && <span className="text-[8px] leading-none mt-0.5 opacity-60">BH</span>}
             {isToday(dateStr) && !entryType && !baseline && !bh && (
                 <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-500" />
             )}
@@ -150,32 +138,22 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
 
     return (
         <>
-            <div
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
-                data-testid="calendar"
-            >
+            <div className="card dark:bg-gray-900 dark:border-white/10" data-testid="calendar">
                 {/* ── Header: navigation ── */}
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={prevMonth}
                         aria-label="Previous month"
-                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                        ‹
-                    </button>
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold"
+                    >‹</button>
 
                     <div className="text-center">
-                        <h2 className="font-semibold text-gray-900 text-base sm:text-lg">
+                        <h2 className="font-bold text-gray-900 dark:text-white text-base">
                             {formatMonthYear(viewYear, viewMonth)}
                         </h2>
-                        {isFullBaseline && (
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                Baseline period — aggregated data only
-                            </p>
-                        )}
-                        {isPartialBaseline && (
-                            <p className="text-xs text-gray-400 mt-0.5">
-                                Shaded days are in the baseline period
+                        {(isFullBaseline || isPartialBaseline) && (
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                {isFullBaseline ? 'Baseline — aggregated only' : 'Shaded = baseline period'}
                             </p>
                         )}
                     </div>
@@ -183,18 +161,16 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                     <button
                         onClick={nextMonth}
                         aria-label="Next month"
-                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                        ›
-                    </button>
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold"
+                    >›</button>
                 </div>
 
                 {/* Jump to today */}
                 {!isCurrentMonthView && (
-                    <div className="flex justify-center mb-4">
+                    <div className="flex justify-center mb-3">
                         <button
                             onClick={goToToday}
-                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-full border border-indigo-200 hover:border-indigo-400 transition-colors"
+                            className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold px-3 py-1 rounded-full border border-indigo-300 dark:border-indigo-500/50 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
                         >
                             Today
                         </button>
@@ -206,7 +182,9 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                     {DAY_HEADERS.map((h) => (
                         <div
                             key={h}
-                            className={`text-center text-xs font-medium py-1 ${h === 'Sat' || h === 'Sun' ? 'text-slate-300' : 'text-gray-400'
+                            className={`text-center text-[11px] font-semibold py-1 ${h === 'Sat' || h === 'Sun'
+                                    ? 'text-gray-300 dark:text-gray-700'
+                                    : 'text-gray-400 dark:text-gray-500'
                                 }`}
                         >
                             {h}
@@ -232,17 +210,16 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                 </div>
 
                 {/* ── Legend ── */}
-                <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-2 justify-center">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/10 flex flex-wrap gap-x-3 gap-y-2 justify-center">
                     {[
                         { color: 'bg-green-500', label: 'Office' },
-                        { color: 'bg-blue-500', label: 'WFH' },
+                        { color: 'bg-indigo-500', label: 'WFH' },
                         { color: 'bg-amber-400', label: 'Absent' },
-                        { color: 'bg-slate-100 border border-slate-200', label: 'Bank Holiday' },
-                        { color: 'bg-gray-100 border border-gray-200', label: 'Baseline' },
+                        { color: 'bg-gray-200 dark:bg-white/10', label: 'Bank Hol.' },
                     ].map(({ color, label }) => (
-                        <div key={label} className="flex items-center gap-1.5">
-                            <span className={`w-3 h-3 rounded ${color} flex-shrink-0`} />
-                            <span className="text-xs text-gray-500">{label}</span>
+                        <div key={label} className="flex items-center gap-1">
+                            <span className={`w-2.5 h-2.5 rounded-md ${color} flex-shrink-0`} />
+                            <span className="text-[11px] text-gray-400 dark:text-gray-500">{label}</span>
                         </div>
                     ))}
                 </div>

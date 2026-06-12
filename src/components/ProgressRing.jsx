@@ -17,7 +17,6 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
     }
 
     function arcPath(startDeg, endDeg) {
-        // Prevent degenerate full circle
         const safEnd = endDeg >= 360 ? 359.99 : endDeg
         const s = polarToCartesian(startDeg)
         const e = polarToCartesian(safEnd)
@@ -27,13 +26,21 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
 
     const clamped = Math.min(100, Math.max(0, percentage))
     const endDeg = (clamped / 100) * 360
+    const targetPos = polarToCartesian((40 / 100) * 360)
 
-    const targetPos = polarToCartesian((40 / 100) * 360) // orange dot at 40%
+    const arcColor =
+        percentage >= 40
+            ? '#22c55e'   // green-500
+            : percentage >= 30
+                ? '#f59e0b'   // amber-500
+                : '#ef4444'   // red-500
 
-    const strokeColor =
-        percentage >= 40 ? '#16a34a' : percentage >= 30 ? '#d97706' : '#dc2626'
     const textColor =
-        percentage >= 40 ? 'text-green-700' : percentage >= 30 ? 'text-amber-600' : 'text-red-600'
+        percentage >= 40
+            ? 'text-green-500'
+            : percentage >= 30
+                ? 'text-amber-500'
+                : 'text-red-500'
 
     return (
         <div
@@ -47,7 +54,8 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
                     cy={cy}
                     r={radius}
                     fill="none"
-                    stroke="#e2e8f0"
+                    stroke="currentColor"
+                    className="text-gray-200 dark:text-white/10"
                     strokeWidth={strokeWidth}
                 />
                 {/* Progress arc */}
@@ -55,13 +63,13 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
                     <path
                         d={arcPath(0, endDeg)}
                         fill="none"
-                        stroke={strokeColor}
+                        stroke={arcColor}
                         strokeWidth={strokeWidth}
                         strokeLinecap="round"
                         style={{ transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}
                     />
                 )}
-                {/* 40% target marker (orange dot) */}
+                {/* 40% target marker */}
                 <circle
                     cx={targetPos.x}
                     cy={targetPos.y}
@@ -77,7 +85,7 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
                 <span className={`text-3xl font-bold leading-none ${textColor}`} data-testid="attendance-pct">
                     {percentage.toFixed(1)}%
                 </span>
-                <span className="text-xs text-gray-400 mt-1">YTD</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-medium">YTD</span>
             </div>
         </div>
     )

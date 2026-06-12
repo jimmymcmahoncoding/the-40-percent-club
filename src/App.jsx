@@ -32,10 +32,10 @@ export default function App() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
             <Header onReset={handleReset} />
 
-            <main className="max-w-5xl mx-auto px-4 py-6 space-y-5 pb-12">
+            <main className="max-w-2xl mx-auto px-4 pt-5 pb-16 space-y-3">
                 <StatsPanel stats={stats} />
                 <RollingPeriodsRow stats={stats} />
                 <CalendarView
@@ -45,10 +45,8 @@ export default function App() {
                 />
                 <ProjectionCard stats={stats} />
 
-                {/* Baseline info footer */}
-                <p className="text-center text-xs text-gray-400 pb-2">
-                    Baseline data: 34 office days / 90 working days (1 Jan – 5 Jun 2026) ·{' '}
-                    17 recorded absence days · YTD target: 40%
+                <p className="text-center text-[11px] text-gray-400 dark:text-gray-600 pt-2">
+                    Baseline: 34 days / 90 working days · 1 Jan – 5 Jun 2026 · 17 absences
                 </p>
             </main>
         </div>

@@ -9,14 +9,13 @@
 
     body {
         @apply antialiased;
+        font-family: 'Inter', system-ui, sans-serif;
     }
 }
 
-@layer utilities {
-
-    /* Ensure calendar day cells are always at least 36px for touch targets */
-    .aspect-square {
-        min-width: 36px;
-        min-height: 36px;
+@layer components {
+    /* dark variant applied inline in components */
+    .card {
+        @apply bg-white rounded-2xl border border-gray-200 p-4 shadow-sm;
     }
 }

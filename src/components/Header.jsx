@@ -1,7 +1,26 @@
 import { useState } from 'react'
+import { useTheme } from '../context/ThemeContext'
+
+function SunIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <circle cx="12" cy="12" r="4" />
+            <path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+    )
+}
+
+function MoonIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+        </svg>
+    )
+}
 
 export default function Header({ onReset }) {
     const [confirming, setConfirming] = useState(false)
+    const { dark, setDark } = useTheme()
 
     function handleReset() {
         onReset()
@@ -9,44 +28,58 @@ export default function Header({ onReset }) {
     }
 
     return (
-        <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 shadow-lg">
-            <div className="max-w-5xl mx-auto px-4 py-5 flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight">
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/60 dark:border-white/10 sticky top-0 z-40">
+            <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+
+                {/* Brand */}
+                <div className="min-w-0">
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
                         🏢 The 40% Club
                     </h1>
-                    <p className="text-indigo-200 text-sm mt-0.5">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
                         Office Attendance Tracker · 2026
                     </p>
-                    <p className="text-indigo-300 text-xs mt-0.5 tracking-wide">
+                    <p className="text-[10px] text-indigo-400 dark:text-indigo-400 leading-tight tracking-wide">
                         jimmymcmahoncoding™
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* Actions */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Dark mode toggle */}
+                    <button
+                        onClick={() => setDark(d => !d)}
+                        aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                    >
+                        {dark ? <SunIcon /> : <MoonIcon />}
+                    </button>
+
+                    {/* Reset */}
                     {confirming ? (
-                        <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
-                            <span className="text-white text-sm">Reset all data?</span>
+                        <div className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl px-2.5 py-1.5">
+                            <span className="text-red-700 dark:text-red-300 text-xs font-medium">Reset?</span>
                             <button
                                 onClick={handleReset}
-                                className="bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                                className="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors"
                             >
                                 Yes
                             </button>
                             <button
                                 onClick={() => setConfirming(false)}
-                                className="bg-white/20 hover:bg-white/30 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs px-1.5 py-1 rounded-lg transition-colors"
                             >
-                                Cancel
+                                No
                             </button>
                         </div>
                     ) : (
                         <button
                             onClick={() => setConfirming(true)}
                             aria-label="Reset all data to baseline"
-                            className="text-indigo-200 hover:text-white text-sm transition-colors px-2 py-1 rounded"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-base"
+                            title="Reset data"
                         >
-                            Reset
+                            ↺
                         </button>
                     )}
                 </div>
