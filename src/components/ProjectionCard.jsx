@@ -69,7 +69,7 @@ function Stat({ label, value, sub, accent, valueColor, testId }) {
     return (
         <div className={`rounded-2xl p-3 text-center ${accent ? 'bg-indigo-500/10 dark:bg-indigo-500/15' : 'bg-gray-50 dark:bg-white/5'}`}>
             <p className={`text-2xl font-bold ${valueColor || (accent ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-800 dark:text-white')}`}
-               data-testid={testId}>
+                data-testid={testId}>
                 {value}
             </p>
             <p className={`text-[11px] mt-0.5 leading-tight ${accent ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>

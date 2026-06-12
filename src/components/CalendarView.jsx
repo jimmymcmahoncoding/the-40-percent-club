@@ -41,8 +41,6 @@ function getDayCellClasses(dateStr, entryType) {
     switch (entryType) {
         case 'office':
             return `bg-green-500 dark:bg-green-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
-        case 'wfh':
-            return `bg-indigo-500 dark:bg-indigo-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
         case 'absent':
             return `bg-amber-400 dark:bg-amber-500 text-white font-bold cursor-pointer active:scale-95 ${ring} ${dimFuture}`
         default:
@@ -213,7 +211,6 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                 <div className="mt-4 pt-3 border-t border-gray-100 dark:border-white/10 flex flex-wrap gap-x-3 gap-y-2 justify-center">
                     {[
                         { color: 'bg-green-500', label: 'Office' },
-                        { color: 'bg-indigo-500', label: 'WFH' },
                         { color: 'bg-amber-400', label: 'Absent' },
                         { color: 'bg-gray-200 dark:bg-white/10', label: 'Bank Hol.' },
                     ].map(({ color, label }) => (

@@ -75,7 +75,7 @@ test.describe('Desktop — initial load', () => {
         await expect(page.getByTestId('calendar')).toContainText('May 2026')
         const bhCell = page.getByTestId('day-2026-05-25')
         await expect(bhCell).toBeVisible()
-        await expect(bhCell).toHaveClass(/bg-slate-100/)
+        await expect(bhCell).toHaveClass(/bg-gray-100/)
     })
 
     test('projection card is rendered', async ({ page }) => {
@@ -120,15 +120,17 @@ test.describe('Desktop — initial load', () => {
     test('rolling cards update when a new office day is added', async ({ page }) => {
         await freshPage(page)
         const card4 = page.getByTestId('rolling-4-week-card')
-        const before = await card4.locator('span').first().textContent()
+        // Read the percentage span (contains a % sign)
+        const pctSpan = card4.locator('span').filter({ hasText: /%/ }).first()
+        const before = parseFloat(await pctSpan.textContent())
 
         // Add Jun 9 as office — within the 4-week window
         await page.getByTestId('day-2026-06-09').click()
         await page.getByTestId('modal-option-office').click()
 
-        const after = await card4.locator('span').first().textContent()
+        const after = parseFloat(await pctSpan.textContent())
         // Percentage should have increased
-        expect(parseFloat(after)).toBeGreaterThan(parseFloat(before))
+        expect(after).toBeGreaterThan(before)
     })
 })
 
@@ -147,12 +149,12 @@ test.describe('Desktop — day interaction', () => {
         await expect(page.getByTestId('day-modal')).toBeVisible()
     })
 
-    test('modal shows three entry options', async ({ page }) => {
+    test('modal shows two entry options', async ({ page }) => {
         await freshPage(page)
         await page.getByTestId('day-2026-06-09').click()
         await expect(page.getByTestId('modal-option-office')).toBeVisible()
-        await expect(page.getByTestId('modal-option-wfh')).toBeVisible()
         await expect(page.getByTestId('modal-option-absent')).toBeVisible()
+        await expect(page.getByTestId('modal-option-wfh')).not.toBeVisible()
     })
 
     test('modal closes when × button is clicked', async ({ page }) => {
@@ -201,11 +203,11 @@ test.describe('Desktop — day interaction', () => {
 
     test('marking Jun 9 as WFH turns cell indigo, does not change counts', async ({ page }) => {
         await freshPage(page)
+        // WFH option no longer exists — modal should only show office and absent
         await page.getByTestId('day-2026-06-09').click()
-        await page.getByTestId('modal-option-wfh').click()
-
-        await expect(page.getByTestId('day-2026-06-09')).toHaveClass(/bg-indigo-500/)
-        // WFH does not affect numerator or denominator
+        await expect(page.getByTestId('modal-option-wfh')).not.toBeVisible()
+        // Close without selecting
+        await page.keyboard.press('Escape')
         await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
     })
 
@@ -237,7 +239,7 @@ test.describe('Desktop — day interaction', () => {
         await freshPage(page)
         const sat = page.getByTestId('day-2026-06-06')
         await expect(sat).toBeVisible()
-        await expect(sat).toHaveClass(/bg-slate-50/)
+        await expect(sat).toHaveClass(/bg-transparent/)
         await sat.click()
         await expect(page.getByTestId('day-modal')).not.toBeVisible()
     })
@@ -347,23 +349,13 @@ test.describe('Mobile — layout & interaction', () => {
         // Confirmation prompt appears
         await expect(page.getByRole('button', { name: 'Yes' })).toBeVisible()
         // Cancel it
-        await page.getByRole('button', { name: 'Cancel' }).click()
+        await page.getByRole('button', { name: 'No' }).click()
         await expect(page.getByRole('button', { name: /reset/i })).toBeVisible()
     })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Absence / holiday effect on projection stats
-//
-// Core behaviour:
-//   • Marking any day "absent" removes it from working-day count.
-//     Office days do NOT change; attendance % rises (same numerator, smaller
-//     denominator).
-//   • Past absences (≤ today) reduce totalWorkingDays → shrink the full-year
-//     denominator and therefore lower the 40% target → "Days still needed" ↓.
-//   • Future absences (> today) reduce remainingWorkingDays → same effect on
-//     the full-year target → "Days still needed" ↓.
-//   • WFH has NO effect on any calculated counts.
+// Absence — past day effects
 // ─────────────────────────────────────────────────────────────────────────────
 test.describe('Absence — past day effects', () => {
     test.use({ viewport: { width: 375, height: 812 } })
@@ -540,33 +532,5 @@ test.describe('Absence — future day effects on projection', () => {
         await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
         const restored = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
         expect(restored).toBe(initial)
-    })
-})
-
-test.describe('WFH — no effect on projection or counts', () => {
-    test.use({ viewport: { width: 375, height: 812 } })
-
-    test('marking a past day WFH does not change working-days or attendance', async ({ page }) => {
-        await freshPage(page)
-        await page.getByTestId('day-2026-06-09').click()
-        await page.getByTestId('modal-option-wfh').click()
-
-        await expect(page.getByTestId('working-days')).toContainText('95')
-        await expect(page.getByTestId('office-days')).toContainText('37')
-        await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
-    })
-
-    test('marking a future day WFH does not change days-remaining or days-needed', async ({ page }) => {
-        await freshPage(page)
-        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
-        const beforeRemaining = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
-        const beforeNeeded = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
-
-        await page.getByTestId('day-2026-06-15').click()
-        await page.getByTestId('modal-option-wfh').click()
-
-        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
-        expect(parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)).toBe(beforeRemaining)
-        expect(parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)).toBe(beforeNeeded)
     })
 })

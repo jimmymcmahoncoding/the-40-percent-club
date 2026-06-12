@@ -20,7 +20,7 @@ export const DEFAULT_DATA = {
         workingDays: 90,
     },
     // Individual day entries logged after the baseline period.
-    // Values: 'office' | 'wfh' | 'absent'
+    // Values: 'office' | 'absent'
     entries: {
         '2026-06-08': 'office',
         '2026-06-11': 'office',
