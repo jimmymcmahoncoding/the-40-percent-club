@@ -199,12 +199,12 @@ test.describe('Desktop — day interaction', () => {
         await expect(page.getByTestId('working-days')).toContainText('94')
     })
 
-    test('marking Jun 9 as WFH turns cell blue, does not change counts', async ({ page }) => {
+    test('marking Jun 9 as WFH turns cell indigo, does not change counts', async ({ page }) => {
         await freshPage(page)
         await page.getByTestId('day-2026-06-09').click()
         await page.getByTestId('modal-option-wfh').click()
 
-        await expect(page.getByTestId('day-2026-06-09')).toHaveClass(/bg-blue-500/)
+        await expect(page.getByTestId('day-2026-06-09')).toHaveClass(/bg-indigo-500/)
         // WFH does not affect numerator or denominator
         await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
     })
@@ -349,5 +349,224 @@ test.describe('Mobile — layout & interaction', () => {
         // Cancel it
         await page.getByRole('button', { name: 'Cancel' }).click()
         await expect(page.getByRole('button', { name: /reset/i })).toBeVisible()
+    })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Absence / holiday effect on projection stats
+//
+// Core behaviour:
+//   • Marking any day "absent" removes it from working-day count.
+//     Office days do NOT change; attendance % rises (same numerator, smaller
+//     denominator).
+//   • Past absences (≤ today) reduce totalWorkingDays → shrink the full-year
+//     denominator and therefore lower the 40% target → "Days still needed" ↓.
+//   • Future absences (> today) reduce remainingWorkingDays → same effect on
+//     the full-year target → "Days still needed" ↓.
+//   • WFH has NO effect on any calculated counts.
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe('Absence — past day effects', () => {
+    test.use({ viewport: { width: 375, height: 812 } })
+
+    // Baseline: 37 office / 95 working = 38.9%
+    // Mark Jun 9 absent → 37 / 94 = 39.4%
+    test('past absence reduces working-days by 1', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+
+        await expect(page.getByTestId('working-days')).toContainText('94')
+    })
+
+    test('past absence does NOT reduce office-days', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+
+        // Office days stay at 37 — absence is not the same as removing an office visit
+        await expect(page.getByTestId('office-days')).toContainText('37')
+    })
+
+    test('past absence increases attendance percentage (fewer working days)', async ({ page }) => {
+        await freshPage(page)
+        const before = parseFloat(await page.getByTestId('attendance-pct').textContent())
+
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+
+        const after = parseFloat(await page.getByTestId('attendance-pct').textContent())
+        expect(after).toBeGreaterThan(before)
+        // 37/94 = 39.4%
+        await expect(page.getByTestId('attendance-pct')).toContainText('39.4%')
+    })
+
+    test('past absence reduces days-still-needed in projection', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const before = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const after = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+        // Target is lower because the full-year denominator shrank
+        expect(after).toBeLessThanOrEqual(before)
+    })
+
+    test('marking 2 past days absent reduces working-days by 2', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+        await page.getByTestId('day-2026-06-10').click()
+        await page.getByTestId('modal-option-absent').click()
+
+        await expect(page.getByTestId('working-days')).toContainText('93')
+    })
+
+    test('clearing a past absence restores working-days', async ({ page }) => {
+        await freshPage(page)
+        // Add absence
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-absent').click()
+        await expect(page.getByTestId('working-days')).toContainText('94')
+
+        // Clear it
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-clear').click()
+
+        // Should be back to 95
+        await expect(page.getByTestId('working-days')).toContainText('95')
+        await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
+    })
+})
+
+test.describe('Absence — future day effects on projection', () => {
+    test.use({ viewport: { width: 375, height: 812 } })
+
+    // Jun 15 is the first working day after the frozen "today" of Jun 12.
+    async function markFutureAbsent(page, dateStr) {
+        // Navigate to the month that contains the date if not already visible
+        const [, monthStr] = dateStr.match(/^(\d{4}-\d{2})/)
+        const calText = await page.getByTestId('calendar').textContent()
+        const targetMonth = new Date(dateStr).toLocaleString('en-GB', { month: 'long', year: 'numeric' })
+        if (!calText.includes(targetMonth.split(' ')[0])) {
+            await page.getByRole('button', { name: 'Next month' }).click()
+        }
+        await page.getByTestId(`day-${dateStr}`).click()
+        await page.getByTestId('modal-option-absent').click()
+    }
+
+    test('future absence reduces days-remaining by 1', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const before = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+
+        await markFutureAbsent(page, '2026-06-15')
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const after = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+        expect(after).toBe(before - 1)
+    })
+
+    test('future absence does NOT change working-days YTD or attendance %', async ({ page }) => {
+        await freshPage(page)
+        await markFutureAbsent(page, '2026-06-15')
+
+        // YTD counts are unaffected — the absence is in the future
+        await expect(page.getByTestId('working-days')).toContainText('95')
+        await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
+    })
+
+    test('future absence reduces days-still-needed', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const before = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+
+        await markFutureAbsent(page, '2026-06-15')
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const after = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+        // Fewer working days remaining → lower 40% target → fewer days needed
+        expect(after).toBeLessThanOrEqual(before)
+    })
+
+    test('5 future absences reduce days-still-needed by approx 2', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const before = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+
+        // Mark the full week of Jun 15-19 as absent
+        for (const d of ['2026-06-15', '2026-06-16', '2026-06-17', '2026-06-18', '2026-06-19']) {
+            await page.getByTestId(`day-${d}`).click()
+            await page.getByTestId('modal-option-absent').click()
+        }
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const after = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+
+        // 5 fewer working days × 40% = 2 fewer target days needed
+        expect(after).toBe(before - 2)
+    })
+
+    test('5 future absences reduce days-remaining by 5', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const beforeRemaining = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+
+        for (const d of ['2026-06-15', '2026-06-16', '2026-06-17', '2026-06-18', '2026-06-19']) {
+            await page.getByTestId(`day-${d}`).click()
+            await page.getByTestId('modal-option-absent').click()
+        }
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const afterRemaining = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+        expect(afterRemaining).toBe(beforeRemaining - 5)
+    })
+
+    test('clearing a future absence restores days-remaining', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const initial = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+
+        await markFutureAbsent(page, '2026-06-15')
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        expect(parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)).toBe(initial - 1)
+
+        // Clear the absence
+        await page.getByTestId('day-2026-06-15').click()
+        await page.getByTestId('modal-option-clear').click()
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const restored = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+        expect(restored).toBe(initial)
+    })
+})
+
+test.describe('WFH — no effect on projection or counts', () => {
+    test.use({ viewport: { width: 375, height: 812 } })
+
+    test('marking a past day WFH does not change working-days or attendance', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('day-2026-06-09').click()
+        await page.getByTestId('modal-option-wfh').click()
+
+        await expect(page.getByTestId('working-days')).toContainText('95')
+        await expect(page.getByTestId('office-days')).toContainText('37')
+        await expect(page.getByTestId('attendance-pct')).toContainText('38.9%')
+    })
+
+    test('marking a future day WFH does not change days-remaining or days-needed', async ({ page }) => {
+        await freshPage(page)
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        const beforeRemaining = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
+        const beforeNeeded = parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)
+
+        await page.getByTestId('day-2026-06-15').click()
+        await page.getByTestId('modal-option-wfh').click()
+
+        await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
+        expect(parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)).toBe(beforeRemaining)
+        expect(parseInt(await page.getByTestId('projection-days-needed').textContent(), 10)).toBe(beforeNeeded)
     })
 })

@@ -38,11 +38,12 @@ export default function ProjectionCard({ stats }) {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-2.5 mb-4">
-                <Stat label="Full-year days" value={totalYearWorkingDays} sub="est." />
-                <Stat label="Target days (40%)" value={yearTargetOfficeDays} accent />
+                <Stat label="Full-year days" value={totalYearWorkingDays} sub="est." testId="projection-year-working-days" />
+                <Stat label="Target days (40%)" value={yearTargetOfficeDays} accent testId="projection-target-days" />
                 <Stat label="Days still needed" value={daysNeededForYear}
-                    valueColor={daysNeededForYear > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-green-500 dark:text-green-400'} />
-                <Stat label="Days remaining" value={daysRemainingInYear} sub="this year" />
+                    valueColor={daysNeededForYear > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-green-500 dark:text-green-400'}
+                    testId="projection-days-needed" />
+                <Stat label="Days remaining" value={daysRemainingInYear} sub="this year" testId="projection-days-remaining" />
             </div>
 
             {/* Guidance */}
@@ -64,10 +65,11 @@ export default function ProjectionCard({ stats }) {
     )
 }
 
-function Stat({ label, value, sub, accent, valueColor }) {
+function Stat({ label, value, sub, accent, valueColor, testId }) {
     return (
         <div className={`rounded-2xl p-3 text-center ${accent ? 'bg-indigo-500/10 dark:bg-indigo-500/15' : 'bg-gray-50 dark:bg-white/5'}`}>
-            <p className={`text-2xl font-bold ${valueColor || (accent ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-800 dark:text-white')}`}>
+            <p className={`text-2xl font-bold ${valueColor || (accent ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-800 dark:text-white')}`}
+               data-testid={testId}>
                 {value}
             </p>
             <p className={`text-[11px] mt-0.5 leading-tight ${accent ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
