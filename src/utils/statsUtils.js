@@ -4,6 +4,7 @@ const YEAR_END = '2026-12-31'
 const TARGET = 0.4
 
 export function calculateStats(data) {
+    if (!data) return null
     const { baseline, entries } = data
     const todayStr = today()
 

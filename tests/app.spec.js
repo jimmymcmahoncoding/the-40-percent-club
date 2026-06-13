@@ -9,11 +9,27 @@ import { test, expect } from '@playwright/test'
 
 const FIXED_TIME = new Date('2026-06-12T10:00:00')
 
+const SEED_DATA = {
+    baseline: {
+        officeDays: 34,
+        workingDays: 90,
+        endDate: '2026-06-05',
+        yearStart: '2026-01-01',
+    },
+    entries: {
+        '2026-06-08': 'office',
+        '2026-06-11': 'office',
+        '2026-06-12': 'office',
+    },
+}
+
 async function freshPage(page) {
     await page.clock.setFixedTime(FIXED_TIME)
     await page.goto('/')
-    // Clear any stored data so we always start from the seeded defaults
-    await page.evaluate(() => localStorage.clear())
+    // Seed localStorage with the known baseline so the app loads the main view
+    await page.evaluate((data) => {
+        localStorage.setItem('the40percentclub_v1', JSON.stringify(data))
+    }, SEED_DATA)
     await page.reload()
     await page.clock.setFixedTime(FIXED_TIME)
 }
@@ -532,5 +548,85 @@ test.describe('Absence — future day effects on projection', () => {
         await page.getByTestId('projection-card').scrollIntoViewIfNeeded()
         const restored = parseInt(await page.getByTestId('projection-days-remaining').textContent(), 10)
         expect(restored).toBe(initial)
+    })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Setup screen
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe('Setup screen', () => {
+    test.use({ viewport: { width: 375, height: 812 } })
+
+    async function freshSetup(page) {
+        await page.clock.setFixedTime(FIXED_TIME)
+        await page.goto('/')
+        await page.evaluate(() => localStorage.removeItem('the40percentclub_v1'))
+        await page.reload()
+        await page.clock.setFixedTime(FIXED_TIME)
+    }
+
+    test('shows setup screen when no data is stored', async ({ page }) => {
+        await freshSetup(page)
+        await expect(page.getByTestId('setup-screen')).toBeVisible()
+    })
+
+    test('setup screen has all required fields', async ({ page }) => {
+        await freshSetup(page)
+        await expect(page.getByTestId('setup-year-start')).toBeVisible()
+        await expect(page.getByTestId('setup-as-of-date')).toBeVisible()
+        await expect(page.getByTestId('setup-office-days')).toBeVisible()
+        await expect(page.getByTestId('setup-working-days')).toBeVisible()
+        await expect(page.getByTestId('setup-submit')).toBeVisible()
+    })
+
+    test('submitting with empty fields shows validation errors', async ({ page }) => {
+        await freshSetup(page)
+        await page.getByTestId('setup-submit').click()
+        await expect(page.getByTestId('setup-screen')).toBeVisible()
+        await expect(page.getByTestId('calendar')).not.toBeVisible()
+    })
+
+    test('completing setup navigates to the main app', async ({ page }) => {
+        await freshSetup(page)
+        await page.getByTestId('setup-office-days').fill('34')
+        await page.getByTestId('setup-working-days').fill('90')
+        await page.getByTestId('setup-as-of-date').fill('2026-06-05')
+        await page.getByTestId('setup-submit').click()
+        await expect(page.getByTestId('calendar')).toBeVisible()
+        await expect(page.getByTestId('setup-screen')).not.toBeVisible()
+    })
+
+    test('setup data is correctly reflected in attendance stats', async ({ page }) => {
+        await freshSetup(page)
+        await page.getByTestId('setup-office-days').fill('34')
+        await page.getByTestId('setup-working-days').fill('90')
+        await page.getByTestId('setup-as-of-date').fill('2026-06-05')
+        await page.getByTestId('setup-submit').click()
+        // 34 office / 95 working (90 baseline + 5 new Jun 6-12) = 35.8%
+        await expect(page.getByTestId('attendance-pct')).toContainText('35.8%')
+    })
+
+    test('setup data persists after reload', async ({ page }) => {
+        await freshSetup(page)
+        await page.getByTestId('setup-office-days').fill('20')
+        await page.getByTestId('setup-working-days').fill('50')
+        await page.getByTestId('setup-as-of-date').fill('2026-06-05')
+        await page.getByTestId('setup-submit').click()
+        await expect(page.getByTestId('calendar')).toBeVisible()
+
+        await page.clock.setFixedTime(FIXED_TIME)
+        await page.reload()
+        await page.clock.setFixedTime(FIXED_TIME)
+
+        await expect(page.getByTestId('setup-screen')).not.toBeVisible()
+        await expect(page.getByTestId('calendar')).toBeVisible()
+    })
+
+    test('reset returns to setup screen', async ({ page }) => {
+        await freshPage(page)
+        await page.getByRole('button', { name: /reset/i }).click()
+        await page.getByRole('button', { name: 'Yes' }).click()
+        await expect(page.getByTestId('setup-screen')).toBeVisible()
+        await expect(page.getByTestId('calendar')).not.toBeVisible()
     })
 })

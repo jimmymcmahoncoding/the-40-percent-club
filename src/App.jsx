@@ -1,16 +1,24 @@
 import { useState, useCallback } from 'react'
-import { loadData, saveData, resetData } from './utils/storage'
+import { loadData, saveData, resetData, initData } from './utils/storage'
 import { calculateStats } from './utils/statsUtils'
 import Header from './components/Header'
 import StatsPanel from './components/StatsPanel'
 import RollingPeriodsRow from './components/RollingPeriodsRow'
 import CalendarView from './components/CalendarView'
 import ProjectionCard from './components/ProjectionCard'
+import SetupScreen from './components/SetupScreen'
+
+function fmtDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00')
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 export default function App() {
     const [data, setData] = useState(() => loadData())
 
-    const stats = calculateStats(data)
+    const handleSetup = useCallback((baseline) => {
+        setData(initData(baseline))
+    }, [])
 
     const handleSetEntry = useCallback((dateStr, type) => {
         setData((prev) => {
@@ -27,9 +35,14 @@ export default function App() {
     }, [])
 
     const handleReset = useCallback(() => {
-        const fresh = resetData()
-        setData(fresh)
+        setData(resetData())
     }, [])
+
+    if (!data) {
+        return <SetupScreen onSetup={handleSetup} />
+    }
+
+    const stats = calculateStats(data)
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
@@ -46,7 +59,8 @@ export default function App() {
                 <ProjectionCard stats={stats} />
 
                 <p className="text-center text-[11px] text-gray-400 dark:text-gray-600 pt-2">
-                    Baseline: 34 days / 90 working days · 1 Jan – 5 Jun 2026 · 17 absences
+                    Baseline: {data.baseline.officeDays} days / {data.baseline.workingDays} working days
+                    {' '}· {fmtDate(data.baseline.yearStart)} – {fmtDate(data.baseline.endDate)}
                 </p>
             </main>
         </div>
