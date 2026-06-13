@@ -18,7 +18,7 @@ export default function ProjectionCard({ stats }) {
         <div className="card dark:bg-gray-900 dark:border-white/10" data-testid="projection-card">
             <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-base">
                 <span>📈</span> Year-End Projection
-                <Tooltip align="left" text="Forecasts how many more office days you need to finish the year at 40%, based on working days remaining to 31 Dec." />
+                <Tooltip align="right" text="Forecasts how many more office days you need to finish the year at 40%, based on working days remaining to 31 Dec." />
             </h2>
 
             {/* Progress bar */}

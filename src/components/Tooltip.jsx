@@ -30,8 +30,8 @@ export default function Tooltip({ text, align = 'center' }) {
 
     const arrowCls =
         align === 'right' ? 'right-2'
-        : align === 'left' ? 'left-2'
-        : 'left-1/2 -translate-x-1/2'
+            : align === 'left' ? 'left-2'
+                : 'left-1/2 -translate-x-1/2'
 
     return (
         <span className="relative inline-flex items-center ml-1">
@@ -40,8 +40,8 @@ export default function Tooltip({ text, align = 'center' }) {
                 type="button"
                 aria-label="More information"
                 className="w-4 h-4 inline-flex items-center justify-center text-[11px] leading-none text-gray-400 dark:text-gray-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors focus:outline-none select-none"
-                onMouseEnter={() => setOpen(true)}
-                onMouseLeave={() => setOpen(false)}
+                onPointerEnter={(e) => { if (e.pointerType === 'mouse') setOpen(true) }}
+                onPointerLeave={(e) => { if (e.pointerType === 'mouse') setOpen(false) }}
                 onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
             >
                 ⓘ
