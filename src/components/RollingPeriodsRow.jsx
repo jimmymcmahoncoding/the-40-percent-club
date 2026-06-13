@@ -1,6 +1,8 @@
+import Tooltip from './Tooltip'
+
 const TARGET = 40
 
-function PeriodCard({ label, data, testId }) {
+function PeriodCard({ label, data, testId, tooltip }) {
     if (!data || data.pct === null) return null
 
     const { officeDays, workingDays, pct, isEstimated } = data
@@ -22,7 +24,10 @@ function PeriodCard({ label, data, testId }) {
     return (
         <div className="card dark:bg-gray-900 dark:border-white/10" data-testid={testId}>
             <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{label}</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center">
+                    {label}
+                    {tooltip && <Tooltip align="left" text={tooltip} />}
+                </p>
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeCls}`}>
                     {onTarget ? 'On target' : 'Below target'}
                 </span>
@@ -57,8 +62,18 @@ function PeriodCard({ label, data, testId }) {
 export default function RollingPeriodsRow({ stats }) {
     return (
         <div className="grid grid-cols-1 gap-3" data-testid="rolling-periods">
-            <PeriodCard label="Last 4 Weeks" data={stats.rolling4} testId="rolling-4-week-card" />
-            <PeriodCard label="Last 12 Weeks" data={stats.rolling12} testId="rolling-12-week-card" />
+            <PeriodCard
+                label="Last 4 Weeks"
+                data={stats.rolling4}
+                testId="rolling-4-week-card"
+                tooltip="Attendance over the past 28 days. Figures marked 'est.' are estimated by prorating your YTD rate across days that fall within your baseline period."
+            />
+            <PeriodCard
+                label="Last 12 Weeks"
+                data={stats.rolling12}
+                testId="rolling-12-week-card"
+                tooltip="Attendance over the past 84 days. Figures marked 'est.' are estimated by prorating your YTD rate across days that fall within your baseline period."
+            />
         </div>
     )
 }

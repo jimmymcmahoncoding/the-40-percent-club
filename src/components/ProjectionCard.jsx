@@ -1,3 +1,5 @@
+import Tooltip from './Tooltip'
+
 export default function ProjectionCard({ stats }) {
     const {
         totalOfficeDays,
@@ -16,6 +18,7 @@ export default function ProjectionCard({ stats }) {
         <div className="card dark:bg-gray-900 dark:border-white/10" data-testid="projection-card">
             <h2 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-base">
                 <span>📈</span> Year-End Projection
+                <Tooltip align="left" text="Forecasts how many more office days you need to finish the year at 40%, based on working days remaining to 31 Dec." />
             </h2>
 
             {/* Progress bar */}
@@ -38,12 +41,20 @@ export default function ProjectionCard({ stats }) {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-2.5 mb-4">
-                <Stat label="Full-year days" value={totalYearWorkingDays} sub="est." testId="projection-year-working-days" />
-                <Stat label="Target days (40%)" value={yearTargetOfficeDays} accent testId="projection-target-days" />
+                <Stat label="Full-year days" value={totalYearWorkingDays} sub="est." testId="projection-year-working-days"
+                    tooltip="Your YTD working days plus remaining working days to 31 Dec (minus pre-logged absences). Used as the base for the 40% target calculation."
+                    tooltipAlign="left" />
+                <Stat label="Target days (40%)" value={yearTargetOfficeDays} accent testId="projection-target-days"
+                    tooltip="Full-year days × 40%, rounded up — the minimum office visits needed to hit the 40% target by 31 Dec."
+                    tooltipAlign="right" />
                 <Stat label="Days still needed" value={daysNeededForYear}
                     valueColor={daysNeededForYear > 0 ? 'text-amber-500 dark:text-amber-400' : 'text-green-500 dark:text-green-400'}
-                    testId="projection-days-needed" />
-                <Stat label="Days remaining" value={daysRemainingInYear} sub="this year" testId="projection-days-remaining" />
+                    testId="projection-days-needed"
+                    tooltip="Target days minus office days you've already done. Drops each time you log an office visit, or when you pre-log a future absence."
+                    tooltipAlign="left" />
+                <Stat label="Days remaining" value={daysRemainingInYear} sub="this year" testId="projection-days-remaining"
+                    tooltip="Working days left from tomorrow to 31 Dec, minus any future absences you've already pre-logged on the calendar."
+                    tooltipAlign="right" />
             </div>
 
             {/* Guidance */}
@@ -65,15 +76,16 @@ export default function ProjectionCard({ stats }) {
     )
 }
 
-function Stat({ label, value, sub, accent, valueColor, testId }) {
+function Stat({ label, value, sub, accent, valueColor, testId, tooltip, tooltipAlign = 'center' }) {
     return (
         <div className={`rounded-2xl p-3 text-center ${accent ? 'bg-indigo-500/10 dark:bg-indigo-500/15' : 'bg-gray-50 dark:bg-white/5'}`}>
             <p className={`text-2xl font-bold ${valueColor || (accent ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-800 dark:text-white')}`}
                 data-testid={testId}>
                 {value}
             </p>
-            <p className={`text-[11px] mt-0.5 leading-tight ${accent ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                {label}{sub && <span className="block opacity-70">{sub}</span>}
+            <p className={`text-[11px] mt-0.5 leading-tight flex items-center justify-center gap-0.5 ${accent ? 'text-indigo-500 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
+                <span>{label}{sub && <span className="block opacity-70">{sub}</span>}</span>
+                {tooltip && <Tooltip text={tooltip} align={tooltipAlign} />}
             </p>
         </div>
     )

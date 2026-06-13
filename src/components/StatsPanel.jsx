@@ -1,4 +1,5 @@
 import ProgressRing from './ProgressRing'
+import Tooltip from './Tooltip'
 
 export default function StatsPanel({ stats }) {
     const {
@@ -24,13 +25,15 @@ export default function StatsPanel({ stats }) {
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1">
                         <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block flex-shrink-0" />
                         40% target
+                        <Tooltip align="center" text="Your YTD office attendance %. The orange dot marks the 40% target. Green = on target, amber = within 10 points, red = more than 10 points below." />
                     </p>
                 </div>
 
                 {/* ── Office days ── */}
                 <div className="card dark:bg-gray-900 dark:border-white/10 flex flex-col justify-between py-5">
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center">
                         Office Days
+                        <Tooltip align="right" text="Days in the office ÷ total working days available this year. Working days exclude weekends, bank holidays, and days you've marked as absent." />
                     </p>
                     <div>
                         <p className="text-4xl font-bold text-gray-900 dark:text-white mt-2 leading-none" data-testid="office-days">
