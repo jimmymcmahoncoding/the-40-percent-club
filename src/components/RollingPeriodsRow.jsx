@@ -24,7 +24,7 @@ function PeriodCard({ label, data, testId, tooltip }) {
     return (
         <div className="card dark:bg-gray-900 dark:border-white/10" data-testid={testId}>
             <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 flex items-center">
                     {label}
                     {tooltip && <Tooltip align="left" text={tooltip} />}
                 </p>

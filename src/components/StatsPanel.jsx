@@ -31,7 +31,7 @@ export default function StatsPanel({ stats }) {
 
                 {/* ── Office days ── */}
                 <div className="card dark:bg-gray-900 dark:border-white/10 flex flex-col justify-between py-5">
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 flex items-center">
                         Office Days
                         <Tooltip align="right" text="Days in the office ÷ total working days available this year. Working days exclude weekends, bank holidays, and days you've marked as absent." />
                     </p>
