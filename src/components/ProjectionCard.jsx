@@ -66,9 +66,7 @@ export default function ProjectionCard({ stats }) {
                     <p>🎉 You've already hit your 40% target for the year — keep it up!</p>
                 ) : (
                     <p>
-                        Need <strong>{daysNeededForYear}</strong> more {daysNeededForYear === 1 ? 'day' : 'days'} from {daysRemainingInYear} remaining
-                        — that's <strong>{rateRequired.toFixed(1)}%</strong>
-                        {daysPerWeekNeeded > 0 && <> (<strong>{daysPerWeekNeeded.toFixed(1)} days/week</strong>)</>}.
+                        You need <strong>{daysNeededForYear}</strong> more office {daysNeededForYear === 1 ? 'day' : 'days'} from your <strong>{daysRemainingInYear}</strong> remaining working {daysRemainingInYear === 1 ? 'day' : 'days'} — a rate of <strong>{rateRequired.toFixed(1)}%</strong>{daysPerWeekNeeded > 0 && <>, or roughly <strong>{daysPerWeekNeeded.toFixed(1)} days in the office per week</strong></>}.
                     </p>
                 )}
             </div>
