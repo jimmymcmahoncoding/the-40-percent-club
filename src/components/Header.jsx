@@ -18,9 +18,20 @@ function MoonIcon() {
     )
 }
 
-export default function Header({ onReset }) {
+function DownloadIcon() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+        </svg>
+    )
+}
+
+export default function Header({ onReset, onExport, baseline }) {
     const [confirming, setConfirming] = useState(false)
     const { dark, setDark } = useTheme()
+
+    const year = baseline?.yearStart?.slice(0, 4) ?? new Date().getFullYear()
+    const target = baseline?.target ?? 40
 
     function handleReset() {
         onReset()
@@ -34,10 +45,10 @@ export default function Header({ onReset }) {
                 {/* Brand */}
                 <div className="min-w-0">
                     <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight leading-tight truncate">
-                        🏢 The 40% Club
+                        🏢 The {target}% Club
                     </h1>
                     <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-                        Office Attendance Tracker · 2026
+                        Office Attendance Tracker · {year}
                     </p>
                     <p className="text-[10px] text-indigo-400 dark:text-indigo-400 leading-tight tracking-wide">
                         jimmymcmahoncoding™
@@ -54,6 +65,18 @@ export default function Header({ onReset }) {
                     >
                         {dark ? <SunIcon /> : <MoonIcon />}
                     </button>
+
+                    {/* Export CSV */}
+                    {onExport && (
+                        <button
+                            onClick={onExport}
+                            aria-label="Export attendance as CSV"
+                            title="Export CSV"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                        >
+                            <DownloadIcon />
+                        </button>
+                    )}
 
                     {/* Reset */}
                     {confirming ? (

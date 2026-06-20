@@ -9,10 +9,11 @@ export default function StatsPanel({ stats }) {
         isOnTarget,
         daysAheadNow,
         daysNeededForYear,
+        target,
     } = stats
 
-    const barFill = Math.min(100, (attendancePct / 40) * 100)
-    const barColor = isOnTarget ? 'bg-green-500' : attendancePct >= 30 ? 'bg-amber-500' : 'bg-red-500'
+    const barFill = Math.min(100, (attendancePct / target) * 100)
+    const barColor = isOnTarget ? 'bg-green-500' : attendancePct >= target - 10 ? 'bg-amber-500' : 'bg-red-500'
 
     return (
         <div className="space-y-3">
@@ -21,11 +22,11 @@ export default function StatsPanel({ stats }) {
 
                 {/* ── Attendance ring ── */}
                 <div className="card dark:bg-gray-900 dark:border-white/10 flex flex-col items-center justify-center py-5">
-                    <ProgressRing percentage={attendancePct} size={148} />
+                    <ProgressRing percentage={attendancePct} size={148} target={target} />
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 flex items-center gap-1">
                         <span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block flex-shrink-0" />
-                        40% target
-                        <Tooltip align="center" text="Your YTD office attendance %. The orange dot marks the 40% target. Green = on target, amber = within 10 points, red = more than 10 points below." />
+                        {target}% target
+                        <Tooltip align="center" text={`Your YTD office attendance %. The orange dot marks the ${target}% target. Green = on target, amber = within 10 points, red = more than 10 points below.`} />
                     </p>
                 </div>
 
@@ -54,7 +55,7 @@ export default function StatsPanel({ stats }) {
                                 aria-valuemax={100}
                             />
                         </div>
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">YTD · target 40%</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">YTD · target {target}%</p>
                     </div>
                 </div>
             </div>
@@ -71,7 +72,7 @@ export default function StatsPanel({ stats }) {
                     <p className={`text-sm ${isOnTarget ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
                         {isOnTarget
                             ? `${Math.round(daysAheadNow)} ${Math.round(daysAheadNow) === 1 ? 'day' : 'days'} ahead of target`
-                            : `${daysNeededForYear} more ${daysNeededForYear === 1 ? 'day' : 'days'} needed to hit 40% this year`
+                            : `${daysNeededForYear} more ${daysNeededForYear === 1 ? 'day' : 'days'} needed to hit ${target}% this year`
                         }
                     </p>
                 </div>

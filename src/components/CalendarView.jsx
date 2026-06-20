@@ -83,12 +83,22 @@ function DayCell({ dateStr, entryType, onClick, baselineStart, baselineEnd }) {
 export default function CalendarView({ entries, baseline, onSetEntry }) {
     const baselineStart = baseline.yearStart
     const baselineEnd = baseline.endDate
+    const yearStr = baseline.yearStart.slice(0, 4)
+    const minYear = parseInt(yearStr)
+    const minMonth = parseInt(baseline.yearStart.slice(5, 7)) - 1 // 0-indexed
+    const maxYear = minYear  // navigation capped to the tracking year
+    const maxMonth = 11     // December
+
     const now = new Date()
     const [viewYear, setViewYear] = useState(now.getFullYear())
     const [viewMonth, setViewMonth] = useState(now.getMonth()) // 0-indexed
     const [selectedDate, setSelectedDate] = useState(null)
 
+    const atMin = viewYear === minYear && viewMonth === minMonth
+    const atMax = viewYear === maxYear && viewMonth === maxMonth
+
     function prevMonth() {
+        if (atMin) return
         if (viewMonth === 0) {
             setViewMonth(11)
             setViewYear((y) => y - 1)
@@ -98,6 +108,7 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
     }
 
     function nextMonth() {
+        if (atMax) return
         if (viewMonth === 11) {
             setViewMonth(0)
             setViewYear((y) => y + 1)
@@ -142,8 +153,9 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                 <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={prevMonth}
+                        disabled={atMin}
                         aria-label="Previous month"
-                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed"
                     >‹</button>
 
                     <div className="text-center">
@@ -159,8 +171,9 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
 
                     <button
                         onClick={nextMonth}
+                        disabled={atMax}
                         aria-label="Next month"
-                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors text-lg font-bold disabled:opacity-30 disabled:cursor-not-allowed"
                     >›</button>
                 </div>
 

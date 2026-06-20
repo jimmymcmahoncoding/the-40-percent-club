@@ -1,0 +1,18 @@
+{
+  "name": "The 40% Club",
+  "short_name": "40% Club",
+  "description": "Track your office attendance against your hybrid working target.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#4f46e5",
+  "background_color": "#f9fafb",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

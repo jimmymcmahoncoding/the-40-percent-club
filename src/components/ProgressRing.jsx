@@ -1,9 +1,9 @@
 /**
  * SVG circular progress ring.
  * Starts at 12 o'clock and fills clockwise.
- * An orange marker is drawn at the 40% position.
+ * An orange marker is drawn at the target % position.
  */
-export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 }) {
+export default function ProgressRing({ percentage, size = 164, strokeWidth = 14, target = 40 }) {
     const radius = (size - strokeWidth) / 2
     const cx = size / 2
     const cy = size / 2
@@ -26,19 +26,19 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
 
     const clamped = Math.min(100, Math.max(0, percentage))
     const endDeg = (clamped / 100) * 360
-    const targetPos = polarToCartesian((40 / 100) * 360)
+    const targetPos = polarToCartesian((target / 100) * 360)
 
     const arcColor =
-        percentage >= 40
+        percentage >= target
             ? '#22c55e'   // green-500
-            : percentage >= 30
+            : percentage >= target - 10
                 ? '#f59e0b'   // amber-500
                 : '#ef4444'   // red-500
 
     const textColor =
-        percentage >= 40
+        percentage >= target
             ? 'text-green-500'
-            : percentage >= 30
+            : percentage >= target - 10
                 ? 'text-amber-500'
                 : 'text-red-500'
 
@@ -69,7 +69,7 @@ export default function ProgressRing({ percentage, size = 164, strokeWidth = 14 
                         style={{ transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)' }}
                     />
                 )}
-                {/* 40% target marker */}
+                {/* Target marker */}
                 <circle
                     cx={targetPos.x}
                     cy={targetPos.y}

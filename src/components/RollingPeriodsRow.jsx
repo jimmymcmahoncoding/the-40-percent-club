@@ -1,16 +1,14 @@
 import Tooltip from './Tooltip'
 
-const TARGET = 40
-
-function PeriodCard({ label, data, testId, tooltip }) {
+function PeriodCard({ label, data, testId, tooltip, target }) {
     if (!data || data.pct === null) return null
 
     const { officeDays, workingDays, pct, isEstimated } = data
-    const onTarget = pct >= TARGET
+    const onTarget = pct >= target
 
     const pctColor = onTarget
         ? 'text-green-500 dark:text-green-400'
-        : pct >= 30
+        : pct >= target - 10
             ? 'text-amber-500 dark:text-amber-400'
             : 'text-red-500 dark:text-red-400'
 
@@ -18,8 +16,8 @@ function PeriodCard({ label, data, testId, tooltip }) {
         ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
         : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
 
-    const barFill = Math.min(100, (pct / TARGET) * 100)
-    const barColor = onTarget ? 'bg-green-500' : pct >= 30 ? 'bg-amber-400' : 'bg-red-400'
+    const barFill = Math.min(100, (pct / target) * 100)
+    const barColor = onTarget ? 'bg-green-500' : pct >= target - 10 ? 'bg-amber-400' : 'bg-red-400'
 
     return (
         <div className="card dark:bg-gray-900 dark:border-white/10" data-testid={testId}>
@@ -54,7 +52,7 @@ function PeriodCard({ label, data, testId, tooltip }) {
                     style={{ width: `${barFill}%` }}
                 />
             </div>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Target: 40%</p>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Target: {target}%</p>
         </div>
     )
 }
@@ -66,12 +64,14 @@ export default function RollingPeriodsRow({ stats }) {
                 label="Last 4 Weeks"
                 data={stats.rolling4}
                 testId="rolling-4-week-card"
+                target={stats.target}
                 tooltip="Attendance over the past 28 days. Figures marked 'est.' are estimated by prorating your YTD rate across days that fall within your baseline period."
             />
             <PeriodCard
                 label="Last 12 Weeks"
                 data={stats.rolling12}
                 testId="rolling-12-week-card"
+                target={stats.target}
                 tooltip="Attendance over the past 84 days. Figures marked 'est.' are estimated by prorating your YTD rate across days that fall within your baseline period."
             />
         </div>

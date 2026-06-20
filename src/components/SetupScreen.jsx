@@ -37,6 +37,7 @@ export default function SetupScreen({ onSetup }) {
     const [asOfDate, setAsOfDate] = useState(todayMinus1)
     const [officeDays, setOfficeDays] = useState('')
     const [workingDays, setWorkingDays] = useState('')
+    const [target, setTarget] = useState('40')
     const [errors, setErrors] = useState({})
 
     function validate() {
@@ -47,12 +48,15 @@ export default function SetupScreen({ onSetup }) {
             errs.asOfDate = 'Must be after the year start date'
         const od = Number(officeDays)
         const wd = Number(workingDays)
+        const t = Number(target)
         if (officeDays === '' || isNaN(od) || od < 0)
             errs.officeDays = 'Enter a whole number ≥ 0'
         if (workingDays === '' || isNaN(wd) || wd <= 0)
             errs.workingDays = 'Enter a whole number > 0'
         if (!errs.officeDays && !errs.workingDays && od > wd)
             errs.officeDays = 'Office days cannot exceed working days'
+        if (target === '' || isNaN(t) || t <= 0 || t > 100)
+            errs.target = 'Enter a % between 1 and 100'
         return errs
     }
 
@@ -68,6 +72,7 @@ export default function SetupScreen({ onSetup }) {
             endDate: asOfDate,
             officeDays: Number(officeDays),
             workingDays: Number(workingDays),
+            target: Number(target),
         })
     }
 
@@ -158,6 +163,24 @@ export default function SetupScreen({ onSetup }) {
                             />
                         </Field>
                     </div>
+
+                    <Field
+                        label="Attendance target (%)"
+                        hint="Your company's required minimum"
+                        error={errors.target}
+                    >
+                        <input
+                            data-testid="setup-target"
+                            type="number"
+                            min="1"
+                            max="100"
+                            step="1"
+                            value={target}
+                            onChange={e => { setTarget(e.target.value); setErrors(v => ({ ...v, target: undefined })) }}
+                            placeholder="e.g. 40"
+                            className={errors.target ? inputErrCls : inputCls}
+                        />
+                    </Field>
 
                     <div className="pt-1">
                         <button
