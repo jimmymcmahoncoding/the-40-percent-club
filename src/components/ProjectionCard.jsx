@@ -18,7 +18,7 @@ export default function ProjectionCard({ stats }) {
 
     // ── What-If simulator ────────────────────────────────────────────────────
     const [showWhatIf, setShowWhatIf] = useState(false)
-    const defaultSim = Math.min(5, Math.max(0, Math.round(daysPerWeekNeeded * 2) / 2))
+    const defaultSim = Math.min(5, Math.max(0, Math.ceil(daysPerWeekNeeded * 2) / 2))
     const [simDaysPerWeek, setSimDaysPerWeek] = useState(defaultSim)
 
     const weeksRemaining = daysRemainingInYear / 5
@@ -81,7 +81,7 @@ export default function ProjectionCard({ stats }) {
                     <p>⚠️ Hitting {target}% by year-end is no longer mathematically possible — but keep going to minimise the gap.</p>
                 ) : (
                     <p>
-                        You need <strong>{daysNeededForYear}</strong> more office {daysNeededForYear === 1 ? 'day' : 'days'} from your <strong>{daysRemainingInYear}</strong> remaining working {daysRemainingInYear === 1 ? 'day' : 'days'} — a rate of <strong>{rateRequired.toFixed(1)}%</strong>{daysPerWeekNeeded > 0 && <>, or roughly <strong>{daysPerWeekNeeded.toFixed(1)} days in the office per week</strong></>}.
+                        You need <strong>{daysNeededForYear}</strong> more office {daysNeededForYear === 1 ? 'day' : 'days'} from your <strong>{daysRemainingInYear}</strong> remaining working {daysRemainingInYear === 1 ? 'day' : 'days'} — a rate of <strong>{rateRequired.toFixed(1)}%</strong>{daysPerWeekNeeded > 0 && <>, or at least <strong>{(Math.ceil(daysPerWeekNeeded * 10) / 10).toFixed(1)} days in the office per week</strong></>}.
                     </p>
                 )}
             </div>
