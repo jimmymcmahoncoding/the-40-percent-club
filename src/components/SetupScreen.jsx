@@ -1,9 +1,8 @@
 import { useState } from 'react'
+import { today, addDays } from '../utils/dateUtils'
 
 function todayMinus1() {
-    const d = new Date()
-    d.setDate(d.getDate() - 1)
-    return d.toISOString().slice(0, 10)
+    return addDays(today(), -1)
 }
 
 function jan1() {

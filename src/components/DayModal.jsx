@@ -73,7 +73,7 @@ export default function DayModal({ date, currentType, onSelect, onClose }) {
                         >
                             <span className="text-xl w-7 text-center">{emoji}</span>
                             <span className="flex-1 text-left">{label}</span>
-                            {currentType === type && <span className="text-sm opacity-75">checkmark</span>}
+                            {currentType === type && <span className="text-sm opacity-75">✓</span>}
                         </button>
                     ))}
                 </div>

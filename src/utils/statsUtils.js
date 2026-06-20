@@ -1,12 +1,12 @@
 import { today, addDays, countWorkingDays } from './dateUtils'
 
-const YEAR_END = '2026-12-31'
 const TARGET = 0.4
 
 export function calculateStats(data) {
     if (!data) return null
     const { baseline, entries } = data
     const todayStr = today()
+    const YEAR_END = `${baseline.yearStart.slice(0, 4)}-12-31`
 
     // Count new office / absence entries in the interactive window (after baseline, up to today)
     let newOfficeDays = 0

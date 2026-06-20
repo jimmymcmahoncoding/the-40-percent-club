@@ -14,16 +14,14 @@ import {
 } from '../utils/dateUtils'
 import DayModal from './DayModal'
 
-const BASELINE_END = '2026-06-05'
-const YEAR_START = '2026-01-01'
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-function getDayCellClasses(dateStr, entryType) {
+function getDayCellClasses(dateStr, entryType, baselineStart, baselineEnd) {
     const todayHighlight = isToday(dateStr)
     const future = isFuture(dateStr)
     const weekend = isWeekend(dateStr)
     const bh = isBankHoliday(dateStr)
-    const baseline = dateStr >= YEAR_START && dateStr <= BASELINE_END
+    const isBaselinePeriod = dateStr >= baselineStart && dateStr <= baselineEnd
 
     if (weekend) {
         return 'bg-transparent text-gray-300 dark:text-gray-700 cursor-default select-none'
@@ -31,7 +29,7 @@ function getDayCellClasses(dateStr, entryType) {
     if (bh) {
         return 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-default select-none'
     }
-    if (baseline) {
+    if (isBaselinePeriod) {
         return 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600 cursor-default select-none'
     }
 
@@ -51,14 +49,14 @@ function getDayCellClasses(dateStr, entryType) {
     }
 }
 
-function DayCell({ dateStr, entryType, onClick }) {
+function DayCell({ dateStr, entryType, onClick, baselineStart, baselineEnd }) {
     const day = parseInt(dateStr.slice(8), 10)
     const bh = isBankHoliday(dateStr)
     const bhName = bh ? getBankHolidayName(dateStr) : null
-    const baseline = dateStr >= YEAR_START && dateStr <= BASELINE_END
-    const interactive = !isWeekend(dateStr) && !bh && !baseline
+    const isBaselinePeriod = dateStr >= baselineStart && dateStr <= baselineEnd
+    const interactive = !isWeekend(dateStr) && !bh && !isBaselinePeriod
 
-    const classes = getDayCellClasses(dateStr, entryType)
+    const classes = getDayCellClasses(dateStr, entryType, baselineStart, baselineEnd)
 
     return (
         <div
@@ -67,7 +65,7 @@ function DayCell({ dateStr, entryType, onClick }) {
             title={
                 bhName
                     ? `${bhName} (Bank Holiday)`
-                    : baseline
+                    : isBaselinePeriod
                         ? 'Baseline period — not individually tracked'
                         : undefined
             }
@@ -75,7 +73,7 @@ function DayCell({ dateStr, entryType, onClick }) {
         >
             <span className="leading-none">{day}</span>
             {bh && <span className="text-[8px] leading-none mt-0.5 opacity-60">BH</span>}
-            {isToday(dateStr) && !entryType && !baseline && !bh && (
+            {isToday(dateStr) && !entryType && !isBaselinePeriod && !bh && (
                 <span className="absolute bottom-1 w-1 h-1 rounded-full bg-indigo-500" />
             )}
         </div>
@@ -83,6 +81,8 @@ function DayCell({ dateStr, entryType, onClick }) {
 }
 
 export default function CalendarView({ entries, baseline, onSetEntry }) {
+    const baselineStart = baseline.yearStart
+    const baselineEnd = baseline.endDate
     const now = new Date()
     const [viewYear, setViewYear] = useState(now.getFullYear())
     const [viewMonth, setViewMonth] = useState(now.getMonth()) // 0-indexed
@@ -131,8 +131,9 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
     // Check if entire displayed month is within baseline period
     const monthLastDay = days[days.length - 1]
     const monthFirstDay = days[0]
-    const isFullBaseline = monthLastDay <= BASELINE_END
-    const isPartialBaseline = monthFirstDay <= BASELINE_END && monthLastDay > BASELINE_END
+    const overlapsBaseline = monthFirstDay <= baselineEnd && monthLastDay >= baselineStart
+    const isFullBaseline = overlapsBaseline && monthFirstDay >= baselineStart && monthLastDay <= baselineEnd
+    const isPartialBaseline = overlapsBaseline && !isFullBaseline
 
     return (
         <>
@@ -203,6 +204,8 @@ export default function CalendarView({ entries, baseline, onSetEntry }) {
                             dateStr={dateStr}
                             entryType={entries[dateStr] || null}
                             onClick={handleDayClick}
+                            baselineStart={baselineStart}
+                            baselineEnd={baselineEnd}
                         />
                     ))}
                 </div>

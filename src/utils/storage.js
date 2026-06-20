@@ -9,7 +9,14 @@ export function loadData() {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) {
             const parsed = JSON.parse(raw)
-            if (parsed?.baseline?.officeDays != null && parsed?.entries) return parsed
+            const b = parsed?.baseline
+            if (
+                b?.officeDays != null &&
+                b?.workingDays != null &&
+                b?.yearStart &&
+                b?.endDate &&
+                parsed?.entries
+            ) return parsed
         }
     } catch {
         // fall through
