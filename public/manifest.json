@@ -4,7 +4,7 @@
   "description": "Track your office attendance against your hybrid working target.",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "theme_color": "#4f46e5",
   "background_color": "#f9fafb",
   "icons": [
